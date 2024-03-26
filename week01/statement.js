@@ -26,7 +26,6 @@ function statement(invoice, plays) {
             }
             thisAmount += 300 * perf.audience;
             break
-        
         default:
             throw new Error(`알 수 없는 장르: ${play.type}`);
         }
