@@ -1,3 +1,11 @@
+// If new genre is added, than we should edit 'switch' part in 'calcPerfByPlayTypes' and 'calcCreditsByPlayTypes ' together.
+
+/**
+ * An object for setting value for each properties by play types.
+ * For unify data convention, it would handle by json file as invocies and plays.
+ */
+const playtypeSetting = require("./playType.json");
+
 /**
  *
  * @param {*} perf A performance from invoice.json's object, charged performance's id to customer.
@@ -5,25 +13,30 @@
  * @returns Charged fee classified by its play type.
  */
 const calcPerfByPlayTypes = (perf, playType) => {
-  let thisBilling = 0;
+  if (playtypeSetting[playType] === undefined) {
+    throw new Error(`알 수 없는 장르: ${playType}`);
+  }
 
-  switch (playType) {
-    case "tragedy":
-      thisBilling = 40000;
-      if (perf.audience > 30) {
-        thisBilling += 1000 * (perf.audience - 30);
-      }
-      break;
-    case "comedy":
-      thisBilling = 30000;
-      if (perf.audience > 20) {
-        thisBilling += 10000 + 500 * (perf.audience - 20);
-      }
-      thisBilling += 300 * perf.audience;
-      break;
+  let thisTypeInfo = playtypeSetting[playType];
+  const {
+    chargeAmount,
+    chargeLimitAud,
+    chargeDefault,
+    chargePerOverAud,
+    chargePerAud,
+  } = thisTypeInfo;
 
-    default:
-      throw new Error(`알 수 없는 장르: ${playType}`);
+  // set default amount and limit
+  let thisBilling = chargeAmount;
+  const isAudOverLimit = perf.audience - chargeLimitAud;
+
+  // if amount of audience is over
+  if (isAudOverLimit > 0) {
+    thisBilling += chargeDefault + chargePerOverAud * isAudOverLimit;
+  }
+
+  if (chargePerAud != 0) {
+    thisBilling += chargePerAud * perf.audience;
   }
 
   return thisBilling;
@@ -41,12 +54,12 @@ const calcCreditsByPlayTypes = (perf, playType) => {
   // 포인트를 적립한다.
   let thisCredit = Math.max(thisAudience - 30, 0);
 
-  switch (playType) {
-    case "comedy": // 희극 관객 5명마다 추가 포인트를 제공한다.
-      thisCredit += Math.floor(thisAudience / 5);
-      break;
-    default:
-      break;
+  let thisTypeInfo = playtypeSetting[playType];
+  const { creditBonusPerAud } = thisTypeInfo;
+
+  // if credit bonus is exist
+  if (creditBonusPerAud != 0) {
+    thisCredit += Math.floor(thisAudience / creditBonusPerAud);
   }
 
   return thisCredit;
@@ -76,6 +89,8 @@ const formatBilling = (billing) => {
 const addTagByType = (content, inputTagType) => {
   let tag;
   let result = "";
+
+  console.log("inputTagType", inputTagType, typeof inputTagType);
 
   tagType = inputTagType.toLowerCase();
   const tagsArr = ["p", "ul", "ol", "li", "h1", "h2", "h3"];

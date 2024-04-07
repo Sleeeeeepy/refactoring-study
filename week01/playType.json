@@ -1,0 +1,18 @@
+{
+  "tragedy": {
+    "chargeAmount": 40000,
+    "chargeDefault": 0,
+    "chargeLimitAud": 30,
+    "chargePerAud": 0,
+    "chargePerOverAud": 1000,
+    "creditBonusPerAud": 0
+  },
+  "comedy": {
+    "chargeAmount": 30000,
+    "chargeDefault": 10000,
+    "chargeLimitAud": 20,
+    "chargePerAud": 300,
+    "chargePerOverAud": 500,
+    "creditBonusPerAud": 5
+  }
+}
